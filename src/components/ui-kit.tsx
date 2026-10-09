@@ -28,12 +28,12 @@ export function Header() {
               activeProps={{ className: "bg-secondary text-secondary-foreground" }}>{n.label}</Link>
           ))}
         </nav>
-        <button className="md:hidden rounded-lg p-2 hover:bg-secondary" onClick={() => setOpen(!open)} aria-label="Menu">
+        <button className="md:hidden rounded-lg p-2 hover:bg-secondary" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav">
           {open ? <X /> : <Menu />}
         </button>
       </div>
       {open && (
-        <nav className="grid gap-1 border-t px-4 py-2 md:hidden">
+        <nav id="mobile-nav" className="grid gap-1 border-t px-4 py-2 md:hidden">
           {NAV.map((n) => (
             <Link key={n.to} to={n.to} onClick={() => setOpen(false)} activeOptions={{ exact: true }}
               className="rounded-lg px-3 py-2 text-sm font-medium" activeProps={{ className: "bg-secondary text-secondary-foreground" }}>{n.label}</Link>

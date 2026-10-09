@@ -59,13 +59,13 @@ function EmergencyPage() {
               {s.items.map((i) => <li key={i} className="rounded-lg bg-muted px-3 py-2">{i}</li>)}
             </ul>
             <div className="mt-4 flex gap-2">
-              <a href="tel:112" className={btnOutline}><Phone size={15} /> Call 112</a>
+              <a href="tel:112" className={btnOutline} aria-label="Call 112 (works on phones)"><Phone size={15} aria-hidden /> Call 112</a>
               <a href={`https://www.google.com/maps/search/${encodeURIComponent(s.query)}`} target="_blank" rel="noreferrer" className={btnOutline}><Navigation size={15} /> Find nearest</a>
             </div>
           </section>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">Facility names above are sample placeholders. “Find nearest” opens Google Maps to search real facilities near you.</p>
+      <p className="text-xs text-muted-foreground">Facility names above are sample placeholders. Call links work on phones; on a laptop, dial the number shown. “Find nearest” opens Google Maps to search real facilities near you.</p>
     </div>
   );
 }
