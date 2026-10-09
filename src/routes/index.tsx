@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, ClipboardList, CloudSun, Droplets, MapPin, Megaphone, Siren, Map } from "lucide-react";
-import { ANNOUNCEMENTS, NEIGHBORHOODS, WEATHER, useNeighborhood, useReports } from "@/lib/data";
+import { ANNOUNCEMENTS, NEIGHBORHOODS, filterByHood, WEATHER, useNeighborhood, useReports } from "@/lib/data";
 import { DemoBadge, input } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/")({
@@ -17,7 +17,8 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [hood, setHood] = useNeighborhood();
-  const { reports, loading } = useReports();
+  const { reports: all, loading } = useReports();
+  const reports = filterByHood(all, hood);
   const w = WEATHER[hood] ?? { temp: 29, cond: "Partly cloudy", humidity: 68 };
   const pending = reports.filter((r) => r.status !== "Resolved").length;
   const resolved = reports.length - pending;
@@ -62,13 +63,14 @@ function Dashboard() {
         </div>
       </section>
 
+      <p className="-mb-4 text-sm text-muted-foreground">Report summary for <strong>{hood}</strong></p>
       <section className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
           <div key={s.label} className="card-base flex items-center gap-4 p-5">
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground"><s.icon /></span>
             <div>
               <p className="text-3xl font-bold">{loading ? "…" : s.value}</p>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
+              <p className="text-sm text-muted-foreground">{s.label} <span className="sr-only">in {hood}</span></p>
             </div>
           </div>
         ))}
