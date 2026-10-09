@@ -24,7 +24,7 @@ function AnnouncementsPage() {
       <div className="mb-4"><DemoBadge>All announcements are demo data</DemoBadge></div>
       <div className="space-y-4">
         {ANNOUNCEMENTS.map((a, i) => {
-          const Icon = ICONS[i];
+          const Icon = ICONS[i] ?? Construction;
           return (
             <article key={a.title} className="card-base flex gap-4 p-5">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon /></span>

@@ -22,7 +22,7 @@ function TrackPage() {
   const list = filter === "All" ? reports : reports.filter((r) => r.status === filter);
 
   const advance = (id: string) =>
-    saveReports(loadReports().map((r) => r.id === id ? { ...r, status: STATUSES[Math.min(STATUSES.indexOf(r.status) + 1, 3)] } : r));
+    saveReports(loadReports().map((r) => r.id === id ? { ...r, status: STATUSES[Math.min(STATUSES.indexOf(r.status) + 1, 3)] ?? "Resolved" } : r));
   const remove = (id: string) => saveReports(loadReports().filter((r) => r.id !== id));
 
   return (

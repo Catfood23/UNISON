@@ -14,7 +14,7 @@ export type Category = (typeof CATEGORIES)[number];
 export const STATUSES = ["Submitted", "Verified", "In Progress", "Resolved"] as const;
 export type Status = (typeof STATUSES)[number];
 
-export const NEIGHBORHOODS = ["Green Park (demo)", "Lakeview (demo)", "Riverside (demo)", "Old Town (demo)"];
+export const NEIGHBORHOODS: string[] = ["Green Park (demo)", "Lakeview (demo)", "Riverside (demo)", "Old Town (demo)"];
 
 export const WEATHER: Record<string, { temp: number; cond: string; humidity: number }> = {
   "Green Park (demo)": { temp: 29, cond: "Partly cloudy", humidity: 68 },
@@ -28,7 +28,7 @@ export type Report = {
   category: Category;
   location: string;
   description: string;
-  photo?: string;
+  photo?: string | undefined;
   date: string;
   status: Status;
 };
@@ -69,7 +69,7 @@ export function useReports() {
 }
 
 export function useNeighborhood() {
-  const [n, setN] = useState(NEIGHBORHOODS[0]);
+  const [n, setN] = useState<string>("Green Park (demo)");
   useEffect(() => { const s = localStorage.getItem("sc-hood"); if (s && WEATHER[s]) setN(s); }, []);
   return [n, (v: string) => { setN(v); localStorage.setItem("sc-hood", v); }] as const;
 }

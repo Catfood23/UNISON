@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [hood, setHood] = useNeighborhood();
   const { reports, loading } = useReports();
-  const w = WEATHER[hood];
+  const w = WEATHER[hood] ?? { temp: 29, cond: "Partly cloudy", humidity: 68 };
   const pending = reports.filter((r) => r.status !== "Resolved").length;
   const resolved = reports.length - pending;
 
