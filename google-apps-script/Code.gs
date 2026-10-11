@@ -85,14 +85,14 @@ function validateReport(r) {
   if (!r || categories.indexOf(r.category) < 0 || neighborhoods.indexOf(r.neighborhood) < 0) throw new Error("Invalid report category or neighborhood.");
   if (typeof r.location !== "string" || !r.location.trim() || r.location.length > MAX_TEXT.location) throw new Error("Invalid report location.");
   if (typeof r.description !== "string" || !r.description.trim() || r.description.length > MAX_TEXT.description) throw new Error("Invalid report description.");
-  if (r.photo && (typeof r.photo !== "string" || r.photo.length > 2000000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(r.photo))) throw new Error("Invalid report photo.");
+  if (r.photo && (typeof r.photo !== "string" || r.photo.length > 2000000 || r.photo.indexOf("data:image/jpeg;base64,") !== 0)) throw new Error("Invalid report photo.");
 }
 
 function savePhoto(dataUrl, reportId) {
   if (!dataUrl) return "";
-  const parts = dataUrl.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/);
-  if (!parts) throw new Error("Only JPEG photos are accepted.");
-  const bytes = Utilities.base64Decode(parts[1]);
+  const prefix = "data:image/jpeg;base64,";
+  if (dataUrl.indexOf(prefix) !== 0) throw new Error("Only JPEG photos are accepted.");
+  const bytes = Utilities.base64Decode(dataUrl.slice(prefix.length));
   const blob = Utilities.newBlob(bytes, "image/jpeg", reportId + ".jpg");
   return getPhotoFolder().createFile(blob).getId();
 }
