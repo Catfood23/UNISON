@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 .output
+.data
+.env
+.env.*
+!.env.example
 .vinxi
 .tanstack/**
 .nitro
@@ -19,6 +23,7 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+.tmp/
 
 # Editor directories and files
 .vscode/*

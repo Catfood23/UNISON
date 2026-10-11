@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "unison-civic-demo",
+  "compatibility_date": "2026-10-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "UNISON_REQUIRE_GOOGLE_STORAGE": "true",
+    "UNISON_SKIP_LOCAL_IMPORT": "true"
+  },
+  "observability": { "enabled": true }
+}

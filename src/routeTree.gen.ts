@@ -16,6 +16,9 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as ApiReportsRouteImport } from './routes/api.reports'
+import { Route as ApiReportsIdRouteImport } from './routes/api.reports.$id'
+import { Route as ApiReportsIdPhotoRouteImport } from './routes/api.reports.$id.photo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +55,21 @@ const TrackRoute = TrackRouteImport.update({
   path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReportsRoute = ApiReportsRouteImport.update({
+  id: '/api/reports',
+  path: '/api/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReportsIdRoute = ApiReportsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiReportsRoute,
+} as any)
+const ApiReportsIdPhotoRoute = ApiReportsIdPhotoRouteImport.update({
+  id: '/photo',
+  path: '/photo',
+  getParentRoute: () => ApiReportsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +79,9 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
+  '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +91,9 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
+  '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +104,9 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
+  '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +118,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/sitemap.xml'
     | '/track'
+    | '/api/reports'
+    | '/api/reports/$id'
+    | '/api/reports/$id/photo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +130,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/sitemap.xml'
     | '/track'
+    | '/api/reports'
+    | '/api/reports/$id'
+    | '/api/reports/$id/photo'
   id:
     | '__root__'
     | '/'
@@ -109,6 +142,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/sitemap.xml'
     | '/track'
+    | '/api/reports'
+    | '/api/reports/$id'
+    | '/api/reports/$id/photo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +155,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRoute
+  ApiReportsRoute: typeof ApiReportsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -172,8 +209,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/reports': {
+      id: '/api/reports'
+      path: '/api/reports'
+      fullPath: '/api/reports'
+      preLoaderRoute: typeof ApiReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reports/$id': {
+      id: '/api/reports/$id'
+      path: '/$id'
+      fullPath: '/api/reports/$id'
+      preLoaderRoute: typeof ApiReportsIdRouteImport
+      parentRoute: typeof ApiReportsRoute
+    }
+    '/api/reports/$id/photo': {
+      id: '/api/reports/$id/photo'
+      path: '/photo'
+      fullPath: '/api/reports/$id/photo'
+      preLoaderRoute: typeof ApiReportsIdPhotoRouteImport
+      parentRoute: typeof ApiReportsIdRoute
+    }
   }
 }
+
+interface ApiReportsIdRouteChildren {
+  ApiReportsIdPhotoRoute: typeof ApiReportsIdPhotoRoute
+}
+
+const ApiReportsIdRouteChildren: ApiReportsIdRouteChildren = {
+  ApiReportsIdPhotoRoute: ApiReportsIdPhotoRoute,
+}
+
+const ApiReportsIdRouteWithChildren = ApiReportsIdRoute._addFileChildren(
+  ApiReportsIdRouteChildren,
+)
+
+interface ApiReportsRouteChildren {
+  ApiReportsIdRoute: typeof ApiReportsIdRouteWithChildren
+}
+
+const ApiReportsRouteChildren: ApiReportsRouteChildren = {
+  ApiReportsIdRoute: ApiReportsIdRouteWithChildren,
+}
+
+const ApiReportsRouteWithChildren = ApiReportsRoute._addFileChildren(
+  ApiReportsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -183,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRoute,
+  ApiReportsRoute: ApiReportsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

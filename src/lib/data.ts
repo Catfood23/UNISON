@@ -1,20 +1,19 @@
 // All content here is DEMO / SAMPLE data for an educational prototype.
 import { useEffect, useState } from "react";
+import {
+  CATEGORIES,
+  MAX_DESCRIPTION,
+  MAX_LOCATION,
+  NEIGHBORHOODS,
+  STATUSES,
+  type Neighborhood,
+  type NewReport,
+  type Report,
+  type Status,
+} from "./report-model";
 
-export const CATEGORIES = [
-  "Pothole",
-  "Damaged road",
-  "Broken streetlight",
-  "Garbage",
-  "Drainage",
-  "Waterlogging",
-] as const;
-export type Category = (typeof CATEGORIES)[number];
-
-export const STATUSES = ["Submitted", "Verified", "In Progress", "Resolved"] as const;
-export type Status = (typeof STATUSES)[number];
-
-export const NEIGHBORHOODS: string[] = ["Green Park (demo)", "Lakeview (demo)", "Riverside (demo)", "Old Town (demo)"];
+export { CATEGORIES, MAX_DESCRIPTION, MAX_LOCATION, NEIGHBORHOODS, STATUSES };
+export type { Category, NewReport, Report, Status } from "./report-model";
 
 export const WEATHER: Record<string, { temp: number; cond: string; humidity: number }> = {
   "Green Park (demo)": { temp: 29, cond: "Partly cloudy", humidity: 68 },
@@ -23,42 +22,72 @@ export const WEATHER: Record<string, { temp: number; cond: string; humidity: num
   "Old Town (demo)": { temp: 30, cond: "Humid & hazy", humidity: 74 },
 };
 
-export type Report = {
-  id: string;
-  category: Category;
-  location: string;
-  description: string;
-  photo?: string | undefined;
-  date: string;
-  status: Status;
-};
-
 export const ANNOUNCEMENTS = [
-  { type: "Road repair", title: "Main Street resurfacing", body: "Road repair work between 10 AM and 5 PM on Monday–Wednesday. Please use the bypass lane.", date: "Oct 12" },
-  { type: "Water supply", title: "Scheduled water interruption", body: "Water supply will be paused on Saturday 9 AM–1 PM for pipeline maintenance. Store water in advance.", date: "Oct 14" },
-  { type: "Garbage", title: "New garbage collection schedule", body: "Wet waste: daily 7 AM. Dry waste: Tuesdays and Fridays. Please segregate waste at home.", date: "Oct 15" },
+  {
+    type: "Road repair",
+    title: "Main Street resurfacing",
+    body: "Road repair work between 10 AM and 5 PM on Monday–Wednesday. Please use the bypass lane.",
+    date: "Oct 12",
+  },
+  {
+    type: "Water supply",
+    title: "Scheduled water interruption",
+    body: "Water supply will be paused on Saturday 9 AM–1 PM for pipeline maintenance. Store water in advance.",
+    date: "Oct 14",
+  },
+  {
+    type: "Garbage",
+    title: "New garbage collection schedule",
+    body: "Wet waste: daily 7 AM. Dry waste: Tuesdays and Fridays. Please segregate waste at home.",
+    date: "Oct 15",
+  },
 ];
 
-const KEY = "smart-community-reports";
+export const ALL_HOODS = "All neighborhoods";
 
-export function loadReports(): Report[] {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-export function saveReports(r: Report[]) {
-  localStorage.setItem(KEY, JSON.stringify(r));
+function dispatchReportsChanged() {
   window.dispatchEvent(new Event("reports-changed"));
 }
-export function makeId() {
-  return "SC-" + Date.now().toString(36).toUpperCase().slice(-6) + Math.floor(Math.random() * 90 + 10);
+
+async function requestReports<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
+    headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers },
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error || "The reports service is unavailable.");
+  }
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
 }
 
-export const MAX_LOCATION = 120;
-export const MAX_DESCRIPTION = 1000;
-export const ALL_HOODS = "All neighborhoods";
+export function loadReports(): Promise<Report[]> {
+  return requestReports<Report[]>("/api/reports");
+}
+
+export async function createReport(report: NewReport): Promise<Report> {
+  const created = await requestReports<Report>("/api/reports", {
+    method: "POST",
+    body: JSON.stringify(report),
+  });
+  dispatchReportsChanged();
+  return created;
+}
+
+export async function updateReport(id: string, status: Status): Promise<Report> {
+  const updated = await requestReports<Report>(`/api/reports/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  dispatchReportsChanged();
+  return updated;
+}
+
+export async function removeReport(id: string): Promise<void> {
+  await requestReports<void>(`/api/reports/${encodeURIComponent(id)}`, { method: "DELETE" });
+  dispatchReportsChanged();
+}
 
 /** Reports created before neighborhoods existed count for every neighborhood. */
 export function filterByHood(reports: Report[], hood: string) {
@@ -85,7 +114,10 @@ export function compressImage(file: File): Promise<string> {
       URL.revokeObjectURL(url);
       resolve(c.toDataURL("image/jpeg", 0.7));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("bad image"));
+    };
     img.src = url;
   });
 }
@@ -93,23 +125,50 @@ export function compressImage(file: File): Promise<string> {
 export function useReports() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   useEffect(() => {
-    const sync = () => setReports(loadReports());
-    sync();
-    setLoading(false);
+    let active = true;
+    const sync = async () => {
+      try {
+        const nextReports = await loadReports();
+        if (active) {
+          setReports(nextReports);
+          setError("");
+        }
+      } catch (cause) {
+        if (active) setError(cause instanceof Error ? cause.message : "Could not load reports.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    void sync();
     window.addEventListener("reports-changed", sync);
-    return () => window.removeEventListener("reports-changed", sync);
+    return () => {
+      active = false;
+      window.removeEventListener("reports-changed", sync);
+    };
   }, []);
-  return { reports, loading };
+  return { reports, loading, error };
 }
 
 export function useNeighborhood() {
-  const [n, setN] = useState<string>("Green Park (demo)");
+  const [n, setN] = useState<Neighborhood>("Green Park (demo)");
   useEffect(() => {
-    const read = () => { const s = localStorage.getItem("sc-hood"); if (s && WEATHER[s]) setN(s); };
+    const read = () => {
+      const s = localStorage.getItem("sc-hood");
+      if (s && Object.hasOwn(WEATHER, s)) setN(s as Neighborhood);
+    };
     read();
     window.addEventListener("hood-changed", read);
     return () => window.removeEventListener("hood-changed", read);
   }, []);
-  return [n, (v: string) => { localStorage.setItem("sc-hood", v); setN(v); window.dispatchEvent(new Event("hood-changed")); }] as const;
+  return [
+    n,
+    (v: string) => {
+      if (!Object.hasOwn(WEATHER, v)) return;
+      localStorage.setItem("sc-hood", v);
+      setN(v as Neighborhood);
+      window.dispatchEvent(new Event("hood-changed"));
+    },
+  ] as const;
 }

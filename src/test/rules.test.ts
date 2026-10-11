@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { ALL_HOODS, filterByHood, isAllowedImage, type Report } from "@/lib/data";
 
-const r = (id: string, neighborhood?: string): Report => ({ id, neighborhood, category: "Pothole", location: "x", description: "y", date: "", status: "Submitted" });
+const r = (id: string, neighborhood?: string): Report => ({
+  id,
+  ...(neighborhood === undefined ? {} : { neighborhood }),
+  category: "Pothole",
+  location: "x",
+  description: "y",
+  date: "",
+  status: "Submitted",
+});
 
 describe("neighborhood filter", () => {
   const list = [r("a", "Lakeview (demo)"), r("b", "Riverside (demo)"), r("c")];
