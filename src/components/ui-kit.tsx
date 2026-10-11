@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Leaf, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import type { Status } from "@/lib/data";
 
 const NAV = [
@@ -17,9 +17,14 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 font-bold text-primary">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><Leaf size={18} /></span>
-          Smart Community
+        <Link to="/" aria-label="UNISON — Different Minds. One Vision." className="flex items-center gap-2.5">
+          <img src="/unison-mark.svg" alt="" className="h-10 w-10 shrink-0" />
+          <span className="flex flex-col leading-none">
+            <span className="text-xl font-extrabold tracking-tight" aria-label="UNISON">
+              <span className="text-[#8111a4]">U</span><span className="text-[#e43d32]">N</span><span className="text-[#f17800]">I</span><span className="text-[#f1bd00]">S</span><span className="text-[#36a92d]">O</span><span className="text-[#138fc2]">N</span>
+            </span>
+            <span className="mt-1 text-[9px] font-medium tracking-wide text-muted-foreground">Different Minds. One Vision.</span>
+          </span>
         </Link>
         <nav className="hidden gap-1 md:flex">
           {NAV.map((n) => (
@@ -48,7 +53,7 @@ export function Footer() {
   return (
     <footer className="mt-16 border-t bg-muted">
       <div className="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-muted-foreground">
-        Smart Community — an educational prototype for an IDT group project (UN SDG 11: Sustainable Cities and Communities).
+        <strong className="font-semibold text-foreground">UNISON — Different Minds. One Vision.</strong> An educational prototype for an IDT group project (UN SDG 11: Sustainable Cities and Communities).
         Reports are stored only in your browser and are <strong>not</strong> sent to any real municipality.
       </div>
     </footer>

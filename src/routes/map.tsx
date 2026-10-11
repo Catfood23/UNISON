@@ -7,9 +7,9 @@ import { DemoBadge, PageTitle, Spinner, StatusPill, input } from "@/components/u
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Community Map — Smart Community" },
+      { title: "Community Map — UNISON" },
       { name: "description", content: "See reported neighborhood issues on a demo map." },
-      { property: "og:title", content: "Community Map — Smart Community" },
+      { property: "og:title", content: "Community Map — UNISON" },
       { property: "og:description", content: "See reported neighborhood issues on a demo map." },
     ],
   }),

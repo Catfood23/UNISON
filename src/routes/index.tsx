@@ -6,9 +6,9 @@ import { DemoBadge, input } from "@/components/ui-kit";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Smart Community — Dashboard" },
+      { title: "Dashboard — UNISON" },
       { name: "description", content: "Your neighborhood at a glance: weather, report summaries and announcements." },
-      { property: "og:title", content: "Smart Community — Dashboard" },
+      { property: "og:title", content: "Dashboard — UNISON" },
       { property: "og:description", content: "Your neighborhood at a glance: weather, report summaries and announcements." },
     ],
   }),

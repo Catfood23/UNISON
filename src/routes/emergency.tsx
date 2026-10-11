@@ -5,9 +5,9 @@ import { DemoBadge, PageTitle, btnOutline } from "@/components/ui-kit";
 export const Route = createFileRoute("/emergency")({
   head: () => ({
     meta: [
-      { title: "Emergency Services — Smart Community" },
+      { title: "Emergency Services — UNISON" },
       { name: "description", content: "Helpline numbers, hospitals, police and ambulance services." },
-      { property: "og:title", content: "Emergency Services — Smart Community" },
+      { property: "og:title", content: "Emergency Services — UNISON" },
       { property: "og:description", content: "Helpline numbers, hospitals, police and ambulance services." },
     ],
   }),

@@ -12,9 +12,9 @@ export const Route = createFileRoute("/track")({
     (STATUSES as readonly string[]).includes(String(s.status)) ? { status: s.status as Status } : {},
   head: () => ({
     meta: [
-      { title: "Track Complaints — Smart Community" },
+      { title: "Track Complaints — UNISON" },
       { name: "description", content: "View and filter submitted complaints by status." },
-      { property: "og:title", content: "Track Complaints — Smart Community" },
+      { property: "og:title", content: "Track Complaints — UNISON" },
       { property: "og:description", content: "View and filter submitted complaints by status." },
     ],
   }),

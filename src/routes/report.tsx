@@ -10,9 +10,9 @@ import { PageTitle, btn, btnOutline, input } from "@/components/ui-kit";
 export const Route = createFileRoute("/report")({
   head: () => ({
     meta: [
-      { title: "Report a Problem — Smart Community" },
+      { title: "Report a Problem — UNISON" },
       { name: "description", content: "Report potholes, broken streetlights, garbage, drainage and more." },
-      { property: "og:title", content: "Report a Problem — Smart Community" },
+      { property: "og:title", content: "Report a Problem — UNISON" },
       { property: "og:description", content: "Report potholes, broken streetlights, garbage, drainage and more." },
     ],
   }),

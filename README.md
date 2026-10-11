@@ -1,6 +1,6 @@
-# Smart Hood
+# UNISON — Different Minds. One Vision.
 
-Build a clean, modern, beginner-friendly website called Smart Community for a first-year college Innovation and Design Thinking (IDT) group project based on the United Nations theme "Sustainable Cities and Communities."
+Build a clean, modern, beginner-friendly website called UNISON for a first-year college Innovation and Design Thinking (IDT) group project based on the United Nations theme "Sustainable Cities and Communities."
 
 Goal: Help residents view neighborhood information, report civic problems, track complaints, and access emergency services in one place.
 
@@ -20,7 +20,7 @@ Keep the interface easy to understand for first-time users.
 
 Create a homepage with:
 
-Smart Community logo and navigation bar.
+UNISON logo and navigation bar, using the tagline "Different Minds. One Vision."
 
 Welcome message and neighborhood location selector.
 
@@ -104,25 +104,20 @@ Include a small footer stating that this is an educational prototype.
 
 Generate the complete working website, not just a static mockup. Prioritize the dashboard, complaint form, issue tracking, emergency services, and responsive design. Keep the project lightweight and suitable for a four-member college group to explain during an IDT presentation.
 
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://smart-hood.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/cbcb3813-f9d4-5972-a77e-a998265de7cf).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js and npm to develop and run the app locally.
 
 ```sh
 git clone <this-repository-url>
-cd <repository-name>
-npm i
+cd smart-hood
+npm install
 npm run dev
+```
+
+Create and run a production build with:
+
+```sh
+npm run build
+npm start
 ```
