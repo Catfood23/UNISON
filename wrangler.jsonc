@@ -3,6 +3,9 @@
   "name": "unison-civic-demo",
   "compatibility_date": "2026-10-11",
   "compatibility_flags": ["nodejs_compat"],
+  // pages_build_output_dir tells Wrangler this is a Pages project.
+  // Nitro's cloudflare_pages preset builds into dist/
+  "pages_build_output_dir": "dist",
   "vars": {
     "UNISON_REQUIRE_GOOGLE_STORAGE": "true",
     "UNISON_SKIP_LOCAL_IMPORT": "true"
