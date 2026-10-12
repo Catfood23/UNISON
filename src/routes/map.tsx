@@ -31,7 +31,8 @@ function pos(s: string) {
 }
 
 function MapPage() {
-  const { reports: all, loading, isRefetching, error, refresh } = useReports();
+  const { reports: all, loading, error } = useReports();
+  const refresh = () => window.dispatchEvent(new Event("unison-demo-changed"));
   const [hood, setHood] = useNeighborhood();
   const reports = filterByHood(all, hood);
   const [sel, setSel] = useState<PublicReport>();
@@ -63,11 +64,11 @@ function MapPage() {
             <DemoBadge>Simulated Coordinates</DemoBadge>
             <button
               onClick={() => void refresh()}
-              disabled={isRefetching}
+              disabled={loading}
               className={`${btnOutline} min-h-[38px] px-3.5 py-1.5 text-xs`}
             >
-              <RefreshCw size={13} className={isRefetching ? "animate-spin text-primary" : ""} />
-              {isRefetching ? "Syncing…" : "Refresh"}
+              <RefreshCw size={13} className={loading ? "animate-spin text-primary" : ""} />
+              {loading ? "Loading…" : "Refresh"}
             </button>
           </div>
         }

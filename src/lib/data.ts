@@ -1,5 +1,15 @@
 // All content here is DEMO / SAMPLE data for an educational prototype.
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
+import {
+  changeReportStatus,
+  deleteReport as deleteDemoReport,
+  listAnnouncements,
+  listReports,
+  makeReport,
+  type DemoReport,
+} from "@/lib/demo-store";
+import type { Announcement } from "@/lib/demo-types";
 import {
   CATEGORIES,
   MAX_DESCRIPTION,
@@ -23,20 +33,23 @@ export const WEATHER: Record<string, { temp: number; cond: string; humidity: num
   "Old Town (demo)": { temp: 30, cond: "Humid & hazy", humidity: 74 },
 };
 
-export const ANNOUNCEMENTS = [
+export const ANNOUNCEMENTS: Announcement[] = [
   {
+    id: "announcement-road",
     type: "Road repair",
     title: "Main Street resurfacing",
     body: "Road repair work between 10 AM and 5 PM on Monday–Wednesday. Please use the bypass lane.",
     date: "Oct 12",
   },
   {
+    id: "announcement-water",
     type: "Water supply",
     title: "Scheduled water interruption",
     body: "Water supply will be paused on Saturday 9 AM–1 PM for pipeline maintenance. Store water in advance.",
     date: "Oct 14",
   },
   {
+    id: "announcement-garbage",
     type: "Garbage",
     title: "New garbage collection schedule",
     body: "Wet waste: daily 7 AM. Dry waste: Tuesdays and Fridays. Please segregate waste at home.",
@@ -46,68 +59,30 @@ export const ANNOUNCEMENTS = [
 
 export const ALL_HOODS = "All neighborhoods";
 
-let syncChannel: BroadcastChannel | null = null;
-if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-  try {
-    syncChannel = new BroadcastChannel("unison-reports-sync");
-  } catch {
-    syncChannel = null;
-  }
-}
-
-export function dispatchReportsChanged() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("reports-changed"));
-    try {
-      syncChannel?.postMessage({ type: "reports-changed", timestamp: Date.now() });
-    } catch {
-      // BroadcastChannel optional fallback
-    }
-  }
-}
-
-async function requestReports<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers },
-  });
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(body?.error || "The reports service is unavailable.");
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
-}
-
 export function loadReports(): Promise<PublicReport[]> {
-  return requestReports<PublicReport[]>("/api/reports");
+  return Promise.resolve(listReports());
 }
 
-export function loadReport(id: string): Promise<PublicReport> {
-  return requestReports<PublicReport>(`/api/reports/${encodeURIComponent(id)}`);
+export function loadReport(id: string): Promise<DemoReport> {
+  const found = listReports().find((item) => item.id === id);
+  return found
+    ? Promise.resolve(found)
+    : Promise.reject(new Error("Report not found in this browser."));
 }
 
-export async function createReport(report: NewReport): Promise<Report> {
-  const created = await requestReports<Report>("/api/reports", {
-    method: "POST",
-    body: JSON.stringify(report),
-  });
-  dispatchReportsChanged();
-  return created;
+export async function createReport(report: NewReport, ownerId: string): Promise<DemoReport> {
+  return makeReport({ ...report, ownerId });
 }
 
 export async function updateReport(id: string, status: Status): Promise<Report> {
-  const updated = await requestReports<Report>(`/api/reports/${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    body: JSON.stringify({ status }),
-  });
-  dispatchReportsChanged();
+  changeReportStatus(id, status);
+  const updated = listReports().find((item) => item.id === id);
+  if (!updated) throw new Error("Report not found.");
   return updated;
 }
 
 export async function removeReport(id: string): Promise<void> {
-  await requestReports<void>(`/api/reports/${encodeURIComponent(id)}`, { method: "DELETE" });
-  dispatchReportsChanged();
+  deleteDemoReport(id);
 }
 
 /** Reports created before neighborhoods existed count for every neighborhood. */
@@ -147,64 +122,74 @@ export function compressImage(file: File): Promise<string> {
 }
 
 export function useReports() {
-  const [reports, setReports] = useState<PublicReport[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isRefetching, setIsRefetching] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [error, setError] = useState("");
-
-  const sync = async (showRefetching = false) => {
-    if (showRefetching) setIsRefetching(true);
-    try {
-      const nextReports = await loadReports();
-      setReports(nextReports);
-      setLastUpdated(new Date());
-      setError("");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not load reports.");
-    } finally {
-      setLoading(false);
-      setIsRefetching(false);
-    }
-  };
-
+  const { user } = useAuth();
+  const [reports, setReports] = useState<DemoReport[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error] = useState("");
   useEffect(() => {
-    void sync();
-    const handleSync = () => void sync();
-    window.addEventListener("reports-changed", handleSync);
-
-    const onChannelMsg = (event: MessageEvent) => {
-      if (event.data?.type === "reports-changed") {
-        void sync();
+    let active = true;
+    const sync = () => {
+      try {
+        const records = listReports().filter(
+          (report) => user?.role === "admin" || report.ownerId === user?.id,
+        );
+        if (active) {
+          setReports(records);
+          setLoading(false);
+        }
+      } catch {
+        if (active) setLoading(false);
       }
     };
-    syncChannel?.addEventListener("message", onChannelMsg);
-
+    sync();
+    window.addEventListener("unison-demo-changed", sync);
     return () => {
-      window.removeEventListener("reports-changed", handleSync);
-      syncChannel?.removeEventListener("message", onChannelMsg);
+      active = false;
+      window.removeEventListener("unison-demo-changed", sync);
     };
-  }, []);
+  }, [user?.id, user?.role]);
+  return { reports, loading, error };
+}
 
-  return { reports, loading, isRefetching, lastUpdated, error, refresh: () => sync(true) };
+export function useAnnouncements() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => listAnnouncements());
+  useEffect(() => {
+    const sync = () => setAnnouncements(listAnnouncements());
+    window.addEventListener("unison-demo-changed", sync);
+    return () => window.removeEventListener("unison-demo-changed", sync);
+  }, []);
+  return announcements;
 }
 
 export function useNeighborhood() {
-  const [n, setN] = useState<Neighborhood>("Green Park (demo)");
+  const { user } = useAuth();
+  const defaultHood = Object.hasOwn(WEATHER, user?.neighborhood ?? "")
+    ? (user?.neighborhood as Neighborhood)
+    : "Green Park (demo)";
+  const [n, setN] = useState<Neighborhood>(defaultHood);
   useEffect(() => {
     const read = () => {
-      const s = localStorage.getItem("sc-hood");
-      if (s && Object.hasOwn(WEATHER, s)) setN(s as Neighborhood);
+      try {
+        const s = localStorage.getItem("sc-hood");
+        if (s && Object.hasOwn(WEATHER, s)) setN(s as Neighborhood);
+        else setN(defaultHood);
+      } catch {
+        setN(defaultHood);
+      }
     };
     read();
     window.addEventListener("hood-changed", read);
     return () => window.removeEventListener("hood-changed", read);
-  }, []);
+  }, [defaultHood]);
   return [
     n,
     (v: string) => {
       if (!Object.hasOwn(WEATHER, v)) return;
-      localStorage.setItem("sc-hood", v);
+      try {
+        localStorage.setItem("sc-hood", v);
+      } catch {
+        return;
+      }
       setN(v as Neighborhood);
       window.dispatchEvent(new Event("hood-changed"));
     },

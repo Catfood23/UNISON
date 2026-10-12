@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -11,7 +12,8 @@ import {
 import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { Header, Footer } from "@/components/ui-kit";
+import { AuthProvider } from "@/lib/auth-context";
+import { ResidentLayout } from "@/components/app-shells";
 
 function NotFoundComponent() {
   return (
@@ -118,13 +120,28 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
-        <Header />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-          <Outlet />
-        </main>
-        <Footer />
-      </div>
+      <AuthProvider>
+        <RouteShell />
+      </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function RouteShell() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (
+    ["/app", "/report", "/track", "/map", "/emergency", "/announcements", "/profile"].includes(
+      pathname,
+    )
+  )
+    return (
+      <ResidentLayout>
+        <Outlet />
+      </ResidentLayout>
+    );
+  return (
+    <main className="min-h-screen">
+      <Outlet />
+    </main>
   );
 }

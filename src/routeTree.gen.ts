@@ -12,9 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MapRouteImport } from './routes/map'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as ApiReportsRouteImport } from './routes/api.reports'
@@ -38,9 +43,24 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
   path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmergencyRoute = EmergencyRouteImport.update({
   id: '/emergency',
   path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapRoute = MapRouteImport.update({
@@ -48,9 +68,19 @@ const MapRoute = MapRouteImport.update({
   path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -93,9 +123,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
+  '/app': typeof AppRoute
   '/emergency': typeof EmergencyRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
@@ -108,9 +143,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
+  '/app': typeof AppRoute
   '/emergency': typeof EmergencyRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
@@ -124,9 +164,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
+  '/app': typeof AppRoute
   '/emergency': typeof EmergencyRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
+  '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
@@ -141,9 +186,14 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/announcements'
+    | '/app'
     | '/emergency'
+    | '/forgot-password'
+    | '/login'
     | '/map'
+    | '/profile'
     | '/report'
+    | '/signup'
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
@@ -156,9 +206,14 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/announcements'
+    | '/app'
     | '/emergency'
+    | '/forgot-password'
+    | '/login'
     | '/map'
+    | '/profile'
     | '/report'
+    | '/signup'
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
@@ -171,9 +226,14 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/announcements'
+    | '/app'
     | '/emergency'
+    | '/forgot-password'
+    | '/login'
     | '/map'
+    | '/profile'
     | '/report'
+    | '/signup'
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
@@ -187,9 +247,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
+  AppRoute: typeof AppRoute
   EmergencyRoute: typeof EmergencyRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
   MapRoute: typeof MapRoute
+  ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
+  SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRoute
   ApiReportsRoute: typeof ApiReportsRouteWithChildren
@@ -220,11 +285,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/emergency': {
       id: '/emergency'
       path: '/emergency'
       fullPath: '/emergency'
       preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/map': {
@@ -234,11 +320,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -321,9 +421,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AnnouncementsRoute: AnnouncementsRoute,
+  AppRoute: AppRoute,
   EmergencyRoute: EmergencyRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
   MapRoute: MapRoute,
+  ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
+  SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRoute,
   ApiReportsRoute: ApiReportsRouteWithChildren,
