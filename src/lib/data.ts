@@ -46,8 +46,24 @@ export const ANNOUNCEMENTS = [
 
 export const ALL_HOODS = "All neighborhoods";
 
-function dispatchReportsChanged() {
-  window.dispatchEvent(new Event("reports-changed"));
+let syncChannel: BroadcastChannel | null = null;
+if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+  try {
+    syncChannel = new BroadcastChannel("unison-reports-sync");
+  } catch {
+    syncChannel = null;
+  }
+}
+
+export function dispatchReportsChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("reports-changed"));
+    try {
+      syncChannel?.postMessage({ type: "reports-changed", timestamp: Date.now() });
+    } catch {
+      // BroadcastChannel optional fallback
+    }
+  }
 }
 
 async function requestReports<T>(url: string, init?: RequestInit): Promise<T> {
@@ -133,30 +149,44 @@ export function compressImage(file: File): Promise<string> {
 export function useReports() {
   const [reports, setReports] = useState<PublicReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState("");
+
+  const sync = async (showRefetching = false) => {
+    if (showRefetching) setIsRefetching(true);
+    try {
+      const nextReports = await loadReports();
+      setReports(nextReports);
+      setLastUpdated(new Date());
+      setError("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load reports.");
+    } finally {
+      setLoading(false);
+      setIsRefetching(false);
+    }
+  };
+
   useEffect(() => {
-    let active = true;
-    const sync = async () => {
-      try {
-        const nextReports = await loadReports();
-        if (active) {
-          setReports(nextReports);
-          setError("");
-        }
-      } catch (cause) {
-        if (active) setError(cause instanceof Error ? cause.message : "Could not load reports.");
-      } finally {
-        if (active) setLoading(false);
+    void sync();
+    const handleSync = () => void sync();
+    window.addEventListener("reports-changed", handleSync);
+
+    const onChannelMsg = (event: MessageEvent) => {
+      if (event.data?.type === "reports-changed") {
+        void sync();
       }
     };
-    void sync();
-    window.addEventListener("reports-changed", sync);
+    syncChannel?.addEventListener("message", onChannelMsg);
+
     return () => {
-      active = false;
-      window.removeEventListener("reports-changed", sync);
+      window.removeEventListener("reports-changed", handleSync);
+      syncChannel?.removeEventListener("message", onChannelMsg);
     };
   }, []);
-  return { reports, loading, error };
+
+  return { reports, loading, isRefetching, lastUpdated, error, refresh: () => sync(true) };
 }
 
 export function useNeighborhood() {
