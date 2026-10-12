@@ -7,7 +7,7 @@ import {
   filterByHood,
   useNeighborhood,
   useReports,
-  type Report,
+  type PublicReport,
 } from "@/lib/data";
 import { DemoBadge, PageTitle, Spinner, StatusPill, input } from "@/components/ui-kit";
 
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-// Places markers at a stable pseudo-position derived from the location text (demo only).
+// Places markers at stable pseudo-positions derived from the reference ID (demo only).
 function pos(s: string) {
   let h = 0;
   for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -34,11 +34,11 @@ function MapPage() {
   const { reports: all, loading, error } = useReports();
   const [hood, setHood] = useNeighborhood();
   const reports = filterByHood(all, hood);
-  const [sel, setSel] = useState<Report>();
+  const [sel, setSel] = useState<PublicReport>();
   // Nudge pins that would land on top of each other so every report stays clickable.
   const placed: { x: number; y: number }[] = [];
   const positions = reports.map((r) => {
-    const p = pos(r.location + r.id);
+    const p = pos(r.id);
     while (placed.some((q) => Math.abs(q.x - p.x) < 5 && Math.abs(q.y - p.y) < 6)) {
       p.x = 8 + ((p.x + 7) % 84);
       p.y = 10 + ((p.y + 5) % 78);
@@ -127,7 +127,7 @@ function MapPage() {
                   key={r.id}
                   onClick={() => setSel(r)}
                   title={r.category}
-                  aria-label={`${r.category} at ${r.location}, status ${r.status}`}
+                  aria-label={`${r.category}, status ${r.status}`}
                   aria-pressed={sel?.id === r.id}
                   className={`absolute -translate-x-1/2 -translate-y-full transition hover:scale-125 ${r.status === "Resolved" ? "text-primary" : "text-destructive"}`}
                   style={{ left: `${p.x}%`, top: `${p.y}%` }}
@@ -151,8 +151,8 @@ function MapPage() {
             <div className="mt-3 space-y-2" aria-live="polite">
               <StatusPill status={sel.status} />
               <p className="font-semibold">{sel.category}</p>
-              <p className="text-sm text-muted-foreground">{sel.location}</p>
-              <p className="break-words text-sm">{sel.description}</p>
+              <p className="text-sm text-muted-foreground">{sel.neighborhood}</p>
+              <p className="font-mono text-xs text-muted-foreground">{sel.id}</p>
             </div>
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">Tap a pin to see the issue.</p>
@@ -175,7 +175,7 @@ function MapPage() {
                       onClick={() => setSel(r)}
                       className="w-full truncate rounded-lg px-2 py-1.5 text-left hover:bg-muted"
                     >
-                      {r.category} — {r.location} ({r.status})
+                      {r.category} — {r.id} ({r.status})
                     </button>
                   </li>
                 ))}

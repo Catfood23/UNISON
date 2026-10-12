@@ -1,17 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getReportPhoto } from "@/lib/server/report-store";
+import { adminUnauthorized, isAdminRequest } from "@/lib/server/admin-auth";
 
 export const Route = createFileRoute("/api/reports/$id/photo")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
+        if (!(await isAdminRequest(request))) return adminUnauthorized();
         try {
           const photo = await getReportPhoto(params.id);
           return photo
             ? new Response(new Uint8Array(photo.bytes).buffer as ArrayBuffer, {
                 headers: {
                   "Content-Type": photo.mimeType,
-                  "Cache-Control": "private, max-age=300",
+                  "Cache-Control": "no-store",
                   "X-Content-Type-Options": "nosniff",
                 },
               })

@@ -38,6 +38,9 @@ export type NewReport = {
   photo?: string;
 };
 
+/** Safe fields shown in public neighborhood summaries and reference lookups. */
+export type PublicReport = Pick<Report, "id" | "category" | "neighborhood" | "date" | "status">;
+
 export const MAX_LOCATION = 120;
 export const MAX_DESCRIPTION = 1000;
 export const MAX_PHOTO_DATA_URL = 2_000_000;

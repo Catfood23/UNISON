@@ -8,12 +8,13 @@ import {
   STATUSES,
   type Neighborhood,
   type NewReport,
+  type PublicReport,
   type Report,
   type Status,
 } from "./report-model";
 
 export { CATEGORIES, MAX_DESCRIPTION, MAX_LOCATION, NEIGHBORHOODS, STATUSES };
-export type { Category, NewReport, Report, Status } from "./report-model";
+export type { Category, NewReport, PublicReport, Report, Status } from "./report-model";
 
 export const WEATHER: Record<string, { temp: number; cond: string; humidity: number }> = {
   "Green Park (demo)": { temp: 29, cond: "Partly cloudy", humidity: 68 },
@@ -62,8 +63,12 @@ async function requestReports<T>(url: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export function loadReports(): Promise<Report[]> {
-  return requestReports<Report[]>("/api/reports");
+export function loadReports(): Promise<PublicReport[]> {
+  return requestReports<PublicReport[]>("/api/reports");
+}
+
+export function loadReport(id: string): Promise<PublicReport> {
+  return requestReports<PublicReport>(`/api/reports/${encodeURIComponent(id)}`);
 }
 
 export async function createReport(report: NewReport): Promise<Report> {
@@ -90,7 +95,10 @@ export async function removeReport(id: string): Promise<void> {
 }
 
 /** Reports created before neighborhoods existed count for every neighborhood. */
-export function filterByHood(reports: Report[], hood: string) {
+export function filterByHood<T extends Pick<PublicReport, "neighborhood">>(
+  reports: T[],
+  hood: string,
+) {
   if (hood === ALL_HOODS) return reports;
   return reports.filter((r) => !r.neighborhood || r.neighborhood === hood);
 }
@@ -123,7 +131,7 @@ export function compressImage(file: File): Promise<string> {
 }
 
 export function useReports() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<PublicReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {

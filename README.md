@@ -133,12 +133,16 @@ npm start
 
 Reports are handled by the server instead of browser local storage:
 
-- `GET /api/reports` lists reports.
+- `GET /api/reports` lists a privacy-limited summary (reference, category, neighborhood, date, status).
+- `GET /api/reports/:id` returns the same limited fields for tracking by reference.
 - `POST /api/reports` validates and creates a report.
-- `PATCH /api/reports/:id` updates a report status (presentation demo control).
-- `DELETE /api/reports/:id` deletes a report.
+- `GET /api/admin/reports` returns full report details and requires an admin session.
+- `PATCH /api/reports/:id` updates a report status and requires an admin session.
+- `DELETE /api/reports/:id` deletes a report and requires an admin session.
+- `GET /api/reports/:id/photo` serves report photos only to an authenticated administrator.
+- `POST` and `DELETE /api/admin/session` create and clear the signed admin session.
 
-For local development without Google configuration, the server writes reports to `.data/reports.json` (ignored by Git). Set `UNISON_DATA_DIR` to use another local directory.
+For local development without Google configuration, the server writes reports to `.data/reports.json` (ignored by Git). Set `UNISON_DATA_DIR` to use another local directory. Set `UNISON_ADMIN_PASSWORD` to a unique password of at least 24 characters to use the admin dashboard locally.
 
 ## Google Sheets and Drive storage
 
@@ -169,8 +173,9 @@ The Cloudflare Worker free plan and Google Apps Script have usage limits. Keep t
    - `CLOUDFLARE_ACCOUNT_ID`
    - `UNISON_GOOGLE_APPS_SCRIPT_URL`
    - `UNISON_GOOGLE_SHARED_SECRET`
+   - `UNISON_ADMIN_PASSWORD` (recommended before using the admin dashboard; unique, at least 24 characters, generated with a password manager)
 3. Before the first deployment, configure the local Google bridge in `.env` using `.env.example`. The first local request to `/api/reports` imports existing `.data/reports.json` records and photos into Sheets/Drive. Verify the records in the spreadsheet before deploying. The production Worker intentionally skips local-file migration because Worker files are not persistent.
 4. Push the deployment files to `main`, or run **Actions → Deploy UNISON to Cloudflare Workers → Run workflow**. The workflow builds using the Cloudflare Nitro preset and deploys the app. The Worker URL will be shown in the workflow output or Cloudflare dashboard.
-5. The workflow installs the two Google settings as Worker **secrets** after deployment. It uses the URL and shared secret from the GitHub Actions secrets above. Confirm the first deployment completed successfully before sharing the Worker URL.
+5. After deployment, the workflow installs the Google settings as Worker **secrets** and installs the admin password if it was provided. Confirm the deployment completed successfully before sharing the Worker URL.
 
-The deployed report endpoints remain public for the class demo: visitors can read, submit, change demo statuses and delete reports. Use only fictional/sample content until access control and abuse protection are added.
+Residents can submit reports and use a reference ID to view only its category, neighborhood, submission date, and current status. Full report details, status changes, report photos, and deletion are restricted to an admin session. Add the optional `UNISON_ADMIN_PASSWORD` GitHub Actions secret before using the admin dashboard; the workflow installs it as a Cloudflare Worker secret. It must be unique and at least 24 characters. Admin sessions use a signed, HTTP-only, Secure, SameSite=Strict cookie and expire after eight hours. This remains an educational prototype: add rate limiting and monitored abuse protection before opening it as a public civic service, and use only fictional/sample content until privacy and retention requirements are defined.

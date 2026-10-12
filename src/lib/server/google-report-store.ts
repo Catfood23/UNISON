@@ -87,6 +87,11 @@ export async function listGoogleReports(): Promise<Report[]> {
   return request<Report[]>("list");
 }
 
+export async function getGoogleReport(id: string): Promise<Report | null> {
+  const reports = await listGoogleReports();
+  return reports.find((report) => report.id === id) ?? null;
+}
+
 export async function createGoogleReport(input: NewReport): Promise<Report> {
   return request<Report>("create", { report: input });
 }

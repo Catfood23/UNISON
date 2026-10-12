@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import type { NewReport, Report, Status } from "../report-model";
+import type { NewReport, PublicReport, Report, Status } from "../report-model";
 import * as google from "./google-report-store";
 
 const dataDirectory = process.env["UNISON_DATA_DIR"]
@@ -73,12 +73,40 @@ export async function listReports(): Promise<Report[]> {
   return (await listLocalReports()).map(publicReport);
 }
 
+export async function getReport(id: string): Promise<Report | null> {
+  if (googleStorageEnabled()) return google.getGoogleReport(id);
+  return (await listLocalReports()).find((report) => report.id === id) ?? null;
+}
+
+export async function listPublicReports(): Promise<PublicReport[]> {
+  return (await listReports()).map(({ id, category, neighborhood, date, status }) => ({
+    id,
+    category,
+    ...(neighborhood === undefined ? {} : { neighborhood }),
+    date,
+    status,
+  }));
+}
+
+export async function getPublicReport(id: string): Promise<PublicReport | null> {
+  const report = await getReport(id);
+  if (!report) return null;
+  const { id: reportId, category, neighborhood, date, status } = report;
+  return {
+    id: reportId,
+    category,
+    ...(neighborhood === undefined ? {} : { neighborhood }),
+    date,
+    status,
+  };
+}
+
 export function createReport(input: NewReport): Promise<Report> {
   if (googleStorageEnabled()) return google.createGoogleReport(input).then(publicReport);
   return serializeWrite(async () => {
     const report: Report = {
       ...input,
-      id: `UN-${randomUUID().slice(0, 8).toUpperCase()}`,
+      id: `UN-${randomUUID().replaceAll("-", "").slice(0, 16).toUpperCase()}`,
       date: new Date().toISOString(),
       status: "Submitted",
     };

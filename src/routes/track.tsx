@@ -1,26 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Calendar, Inbox, MapPin, Trash2 } from "lucide-react";
-import {
-  ALL_HOODS,
-  NEIGHBORHOODS,
-  STATUSES,
-  filterByHood,
-  removeReport,
-  updateReport,
-  useNeighborhood,
-  useReports,
-  type Status,
-} from "@/lib/data";
-import { PageTitle, Spinner, StatusPill, btn, input } from "@/components/ui-kit";
-
-type Filter = Status | "All";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Calendar, Search } from "lucide-react";
+import { loadReport, type PublicReport } from "@/lib/data";
+import { PageTitle, Spinner, StatusPill, input } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/track")({
-  validateSearch: (s: Record<string, unknown>): { status?: Filter } =>
-    (STATUSES as readonly string[]).includes(String(s["status"]))
-      ? { status: s["status"] as Status }
-      : {},
+  validateSearch: (s: Record<string, unknown>): { id?: string } => {
+    const id = typeof s["id"] === "string" ? s["id"].trim().toUpperCase() : "";
+    return /^UN-[A-Z0-9-]{6,40}$/u.test(id) ? { id } : {};
+  },
   head: () => ({
     meta: [
       { title: "Track Complaints — UNISON" },
@@ -33,147 +21,106 @@ export const Route = createFileRoute("/track")({
 });
 
 function TrackPage() {
-  const { reports, loading, error: loadError } = useReports();
-  const [actionError, setActionError] = useState("");
-  const [busyId, setBusyId] = useState("");
-  const [hood, setHood] = useNeighborhood();
-  const filter: Filter = Route.useSearch().status ?? "All";
+  const { id: searchId } = Route.useSearch();
+  const [reference, setReference] = useState(searchId ?? "");
+  const [report, setReport] = useState<PublicReport | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = Route.useNavigate();
-  const byHood = filterByHood(reports, hood);
-  const list = filter === "All" ? byHood : byHood.filter((r) => r.status === filter);
 
-  const advance = async (id: string, currentStatus: Status) => {
-    setBusyId(id);
-    setActionError("");
-    try {
-      const nextStatus = STATUSES[Math.min(STATUSES.indexOf(currentStatus) + 1, 3)] ?? "Resolved";
-      await updateReport(id, nextStatus);
-    } catch (cause) {
-      setActionError(cause instanceof Error ? cause.message : "The status could not be updated.");
-    } finally {
-      setBusyId("");
+  useEffect(() => {
+    if (!searchId) {
+      setReport(null);
+      setError("");
+      return;
     }
-  };
-  const remove = async (id: string) => {
-    if (!window.confirm(`Delete complaint ${id}? This cannot be undone.`)) return;
-    setBusyId(id);
-    setActionError("");
-    try {
-      await removeReport(id);
-    } catch (cause) {
-      setActionError(cause instanceof Error ? cause.message : "The report could not be deleted.");
-    } finally {
-      setBusyId("");
+    let active = true;
+    setReference(searchId);
+    setLoading(true);
+    setError("");
+    void loadReport(searchId)
+      .then((found) => {
+        if (active) setReport(found);
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setReport(null);
+          setError(cause instanceof Error ? cause.message : "Could not find that report.");
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [searchId]);
+
+  const search = (event: React.FormEvent) => {
+    event.preventDefault();
+    const id = reference.trim().toUpperCase();
+    if (!/^UN-[A-Z0-9-]{6,40}$/u.test(id)) {
+      setReport(null);
+      setError("Enter the report reference ID shown after submission.");
+      return;
     }
+    void navigate({ search: { id } });
   };
 
   return (
     <div>
-      <PageTitle title="Track Complaints" subtitle="Complaints saved by the UNISON demo server." />
-      {(loadError || actionError) && (
+      <PageTitle
+        title="Track a Report"
+        subtitle="Use your reference ID to check the latest status."
+      />
+      <form
+        onSubmit={search}
+        className="card-base mb-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-end"
+      >
+        <label className="flex-1 text-sm font-semibold">
+          Report reference ID
+          <input
+            className={`${input} mt-1 font-mono uppercase`}
+            value={reference}
+            maxLength={43}
+            placeholder="UN-XXXXXXXXXXXX"
+            onChange={(event) => setReference(event.target.value)}
+          />
+        </label>
+        <button
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          disabled={loading}
+        >
+          <Search size={16} aria-hidden /> {loading ? "Searching…" : "Check status"}
+        </button>
+      </form>
+      {error && (
         <p
           className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
           role="alert"
         >
-          {actionError || loadError}
+          {error}
         </p>
       )}
-      <div className="mb-4 flex flex-wrap items-end gap-4">
-        <label className="text-sm font-semibold">
-          Neighborhood
-          <select
-            className={`${input} mt-1 max-w-xs`}
-            value={hood}
-            onChange={(e) => setHood(e.target.value)}
-          >
-            {[ALL_HOODS, ...NEIGHBORHOODS].map((n) => (
-              <option key={n}>{n}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter by status">
-        {(["All", ...STATUSES] as const).map((s) => (
-          <button
-            key={s}
-            aria-pressed={filter === s}
-            onClick={() => navigate({ search: s === "All" ? {} : { status: s } })}
-            className={`min-h-11 rounded-full border px-4 py-1.5 text-sm font-medium ${filter === s ? "border-primary bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
       {loading ? (
         <Spinner />
-      ) : loadError ? null : list.length === 0 ? (
-        <div className="card-base p-10 text-center">
-          <Inbox size={44} className="mx-auto text-muted-foreground" aria-hidden />
-          <p className="mt-3 font-semibold">
-            No complaints {filter !== "All" && `with status “${filter}”`} yet
-          </p>
-          <Link to="/report" className={`${btn} mt-4`}>
-            Report a Problem
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {list.map((r) => (
-            <article key={r.id} className="card-base flex min-w-0 flex-col p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="font-bold">{r.category}</h2>
-                  <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin size={14} className="shrink-0" aria-hidden />{" "}
-                    <span className="break-words min-w-0">
-                      {r.location}
-                      {r.neighborhood && ` · ${r.neighborhood}`}
-                    </span>
-                  </p>
-                </div>
-                <StatusPill status={r.status} />
-              </div>
-              <p className="mt-3 whitespace-pre-line break-words text-sm">{r.description}</p>
-              {r.photo && (
-                <img
-                  src={r.photo}
-                  alt={`Photo of ${r.category.toLowerCase()} at ${r.location}`}
-                  className="mt-3 h-36 w-full rounded-xl object-cover"
-                />
-              )}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Calendar size={13} aria-hidden /> {new Date(r.date).toLocaleDateString()} ·{" "}
-                  <span className="font-mono">{r.id}</span>
-                </span>
-                <span className="flex items-center gap-2">
-                  {r.status !== "Resolved" && (
-                    <button
-                      onClick={() => void advance(r.id, r.status)}
-                      disabled={busyId === r.id}
-                      className="rounded-lg border border-dashed px-2 py-1 font-semibold text-primary hover:bg-secondary disabled:opacity-50"
-                      title="Demo only: simulates the municipality updating the status"
-                    >
-                      {busyId === r.id ? "Saving…" : "Demo control: advance status"}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => void remove(r.id)}
-                    disabled={busyId === r.id}
-                    aria-label={`Delete complaint ${r.id}`}
-                    className="grid min-h-11 min-w-11 place-items-center rounded-lg hover:text-destructive disabled:opacity-50"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      ) : report ? (
+        <article className="card-base flex flex-wrap items-center justify-between gap-4 p-5">
+          <div>
+            <h2 className="font-bold">{report.category}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {report.neighborhood ?? "Neighborhood not listed"}
+            </p>
+            <p className="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
+              <Calendar size={13} aria-hidden /> {new Date(report.date).toLocaleDateString()} ·{" "}
+              <span className="font-mono">{report.id}</span>
+            </p>
+          </div>
+          <StatusPill status={report.status} />
+        </article>
+      ) : null}
       <p className="mt-6 text-xs text-muted-foreground">
-        “Demo control” buttons exist only for the presentation. In a real system, only verified
-        officials could change a complaint's status.
+        Report descriptions, locations, and photos are visible only to signed-in administrators.
       </p>
     </div>
   );

@@ -91,7 +91,7 @@ function ReportPage() {
           Saved by the UNISON demo server. This report is not sent to a real municipality.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link to="/track" className={btn}>
+          <Link to="/track" search={{ id: doneId }} className={btn}>
             Track complaints
           </Link>
           <button

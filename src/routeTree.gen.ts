@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as MapRouteImport } from './routes/map'
@@ -17,12 +18,19 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as ApiReportsRouteImport } from './routes/api.reports'
+import { Route as ApiAdminReportsRouteImport } from './routes/api.admin.reports'
+import { Route as ApiAdminSessionRouteImport } from './routes/api.admin.session'
 import { Route as ApiReportsIdRouteImport } from './routes/api.reports.$id'
 import { Route as ApiReportsIdPhotoRouteImport } from './routes/api.reports.$id.photo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
@@ -60,6 +68,16 @@ const ApiReportsRoute = ApiReportsRouteImport.update({
   path: '/api/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminReportsRoute = ApiAdminReportsRouteImport.update({
+  id: '/api/admin/reports',
+  path: '/api/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSessionRoute = ApiAdminSessionRouteImport.update({
+  id: '/api/admin/session',
+  path: '/api/admin/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiReportsIdRoute = ApiReportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -73,6 +91,7 @@ const ApiReportsIdPhotoRoute = ApiReportsIdPhotoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
   '/emergency': typeof EmergencyRoute
   '/map': typeof MapRoute
@@ -80,11 +99,14 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/admin/reports': typeof ApiAdminReportsRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
   '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
   '/emergency': typeof EmergencyRoute
   '/map': typeof MapRoute
@@ -92,12 +114,15 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/admin/reports': typeof ApiAdminReportsRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
   '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
   '/emergency': typeof EmergencyRoute
   '/map': typeof MapRoute
@@ -105,6 +130,8 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/admin/reports': typeof ApiAdminReportsRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/reports/$id': typeof ApiReportsIdRouteWithChildren
   '/api/reports/$id/photo': typeof ApiReportsIdPhotoRoute
 }
@@ -112,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/announcements'
     | '/emergency'
     | '/map'
@@ -119,11 +147,14 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
+    | '/api/admin/reports'
+    | '/api/admin/session'
     | '/api/reports/$id'
     | '/api/reports/$id/photo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/announcements'
     | '/emergency'
     | '/map'
@@ -131,11 +162,14 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
+    | '/api/admin/reports'
+    | '/api/admin/session'
     | '/api/reports/$id'
     | '/api/reports/$id/photo'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/announcements'
     | '/emergency'
     | '/map'
@@ -143,12 +177,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/track'
     | '/api/reports'
+    | '/api/admin/reports'
+    | '/api/admin/session'
     | '/api/reports/$id'
     | '/api/reports/$id/photo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
   EmergencyRoute: typeof EmergencyRoute
   MapRoute: typeof MapRoute
@@ -156,6 +193,8 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRoute
   ApiReportsRoute: typeof ApiReportsRouteWithChildren
+  ApiAdminReportsRoute: typeof ApiAdminReportsRoute
+  ApiAdminSessionRoute: typeof ApiAdminSessionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/announcements': {
@@ -216,6 +262,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/reports': {
+      id: '/api/admin/reports'
+      path: '/api/admin/reports'
+      fullPath: '/api/admin/reports'
+      preLoaderRoute: typeof ApiAdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/session': {
+      id: '/api/admin/session'
+      path: '/api/admin/session'
+      fullPath: '/api/admin/session'
+      preLoaderRoute: typeof ApiAdminSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/reports/$id': {
       id: '/api/reports/$id'
       path: '/$id'
@@ -259,6 +319,7 @@ const ApiReportsRouteWithChildren = ApiReportsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AnnouncementsRoute: AnnouncementsRoute,
   EmergencyRoute: EmergencyRoute,
   MapRoute: MapRoute,
@@ -266,6 +327,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRoute,
   ApiReportsRoute: ApiReportsRouteWithChildren,
+  ApiAdminReportsRoute: ApiAdminReportsRoute,
+  ApiAdminSessionRoute: ApiAdminSessionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -7,7 +7,7 @@ import {
   MAX_PHOTO_DATA_URL,
   NEIGHBORHOODS,
 } from "@/lib/report-model";
-import { createReport, listReports } from "@/lib/server/report-store";
+import { createReport, listPublicReports } from "@/lib/server/report-store";
 
 const newReportSchema = z
   .object({
@@ -32,7 +32,9 @@ export const Route = createFileRoute("/api/reports")({
     handlers: {
       GET: async () => {
         try {
-          return Response.json(await listReports(), { headers: { "Cache-Control": "no-store" } });
+          return Response.json(await listPublicReports(), {
+            headers: { "Cache-Control": "no-store" },
+          });
         } catch (error) {
           console.error("Could not read reports", error);
           return errorResponse("Reports are temporarily unavailable.", 500);
