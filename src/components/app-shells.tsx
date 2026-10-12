@@ -82,12 +82,12 @@ export function ResidentLayout({ children }: { children: ReactNode }) {
     <ResidentGate>
       <div className="min-h-screen bg-muted/40 pb-20 md:pb-0">
         <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r bg-background p-5 md:flex">
-          <Link to="/app" className="mb-8 flex items-center gap-3">
-            <img src="/unison-mark.svg" alt="" className="h-10 w-10" />
-            <span>
-              <b className="block text-lg">UNISON</b>
-              <small className="text-muted-foreground">Resident space</small>
-            </span>
+          <Link to="/app" aria-label="UNISON resident space" className="mb-8 flex justify-center">
+            <img
+              src="/unison-logo.jpg"
+              alt="UNISON — Different Minds. One Vision."
+              className="h-auto w-full max-w-[210px] rounded-xl object-contain"
+            />
           </Link>
           <nav className="space-y-1">
             {residentLinks.map((item) => (
@@ -141,7 +141,14 @@ export function ResidentLayout({ children }: { children: ReactNode }) {
             >
               {menu ? <X /> : <Menu />}
             </button>
-            <span className="font-semibold md:hidden">UNISON</span>
+            <span className="flex items-center gap-2 font-semibold md:hidden">
+              <img
+                src="/unison-logo-mark.jpg"
+                alt=""
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              UNISON
+            </span>
             <span className="hidden text-sm text-muted-foreground md:block">
               Your neighborhood, together
             </span>
@@ -215,12 +222,17 @@ export function AdminLayout({
     <AdminGate>
       <div className="min-h-screen bg-muted/40">
         <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r bg-[#173f32] p-5 text-white md:flex">
-          <Link to="/admin" search={{ view: "overview" }} className="mb-8 flex items-center gap-3">
-            <img src="/unison-mark.svg" alt="" className="h-10 w-10 rounded-xl bg-white p-1" />
-            <span>
-              <b className="block text-lg">UNISON</b>
-              <small className="text-white/70">Admin workspace</small>
-            </span>
+          <Link
+            to="/admin"
+            search={{ view: "overview" }}
+            aria-label="UNISON admin workspace"
+            className="mb-8 flex justify-center"
+          >
+            <img
+              src="/unison-logo.jpg"
+              alt="UNISON — Different Minds. One Vision."
+              className="h-auto w-full max-w-[210px] rounded-xl bg-white p-1 object-contain"
+            />
           </Link>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/60">
             Management

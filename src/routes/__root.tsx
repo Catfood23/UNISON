@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/unison-mark.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/unison-logo-mark.jpg", type: "image/jpeg" },
     ],
   }),
   shellComponent: RootShell,

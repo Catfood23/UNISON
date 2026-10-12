@@ -17,7 +17,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           <p className="mt-8 text-xs leading-5 text-muted-foreground">{AUTH_FOOTER}</p>
         </section>
         <aside className="hidden flex-col justify-between bg-secondary p-10 lg:flex">
-          <Brand />
+          <Brand full />
           <div>
             <p className="text-sm font-semibold text-primary">Different Minds. One Vision.</p>
             <h2 className="mt-3 max-w-md text-4xl font-bold leading-tight">
@@ -47,10 +47,21 @@ export function AuthLayout({ children }: { children: ReactNode }) {
     </main>
   );
 }
-export function Brand() {
+export function Brand({ full = false }: { full?: boolean }) {
+  if (full) {
+    return (
+      <Link to="/login" aria-label="UNISON — Different Minds. One Vision." className="mb-8">
+        <img
+          src="/unison-logo.jpg"
+          alt="UNISON — Different Minds. One Vision."
+          className="h-auto w-full max-w-[220px] rounded-xl object-contain"
+        />
+      </Link>
+    );
+  }
   return (
     <Link to="/login" className="mb-8 inline-flex items-center gap-3">
-      <img src="/unison-mark.svg" alt="" className="h-11 w-11" />
+      <img src="/unison-logo-mark.jpg" alt="" className="h-11 w-11 rounded-full object-cover" />
       <span>
         <span className="block text-xl font-extrabold tracking-tight">UNISON</span>
         <span className="text-xs text-muted-foreground">Different Minds. One Vision.</span>

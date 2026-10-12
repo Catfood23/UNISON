@@ -25,7 +25,11 @@ export function Header() {
           className="flex items-center gap-3 group"
         >
           <div className="grid h-11 w-11 place-items-center rounded-2xl bg-background shadow-[4px_4px_10px_rgba(163,177,198,0.55),-4px_-4px_10px_rgba(255,255,255,0.9)] border border-white/60 transition group-hover:scale-105">
-            <img src="/unison-mark.svg" alt="UNISON Logo" className="h-7 w-7 shrink-0" />
+            <img
+              src="/unison-logo-mark.jpg"
+              alt="UNISON community mark"
+              className="h-7 w-7 shrink-0 rounded-full object-cover"
+            />
           </div>
           <span className="flex flex-col leading-none">
             <span
